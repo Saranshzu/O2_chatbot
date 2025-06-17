@@ -1,0 +1,1 @@
+web: gunicorn beautiful_dashboard_interface:app
