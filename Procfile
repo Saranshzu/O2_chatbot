@@ -1,1 +1,1 @@
-echo "web: python simple_dashboard.py"
+web: python simple_dashboard.py
