@@ -1,1 +1,1 @@
-web: gunicorn beautiful_dashboard_interface:app
+echo "web: python simple_dashboard.py"
