@@ -1,71 +1,97 @@
 #!/usr/bin/env python3
 """
-Clean Formatted Chatbot - main_ai_system.py
-Perfect formatting for web display
+Clean Formatted Chatbot - Demo Mode (No Pandas Required)
+Perfect for initial deployment
 """
 
-import pandas as pd
 import re
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 import logging
-
-from clean_fixed_processor import DataProcessor
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class CleanChatbot:
     """
-    Clean chatbot with perfect web formatting
+    Clean chatbot with demo mode for deployment
     """
     
     def __init__(self):
-        self.data_processor = None
         self.is_initialized = False
-        self.plant_aliases = {}
         
-        logger.info("Clean Chatbot initialized")
+        # Demo plant data for showcase
+        self.demo_plants = {
+            'CEPPL_WIND': {
+                'name': 'CEPPL Wind Farm',
+                'type': '🌪️ Wind Power',
+                'total_generation': 24272985,
+                'daily_average': 159691,
+                'peak_output': 1072005,
+                'availability': 96.5,
+                'performance_ratio': 87.3,
+                'capacity_factor': 28.5
+            },
+            'AXPPL_SOLAR': {
+                'name': 'AXPPL Solar Plant',
+                'type': '☀️ Solar Power',
+                'total_generation': 18945672,
+                'daily_average': 124387,
+                'peak_output': 890234,
+                'availability': 94.2,
+                'performance_ratio': 91.7,
+                'capacity_factor': 32.1
+            },
+            'PSEGPL_HYDRO': {
+                'name': 'PSEGPL Hydroelectric',
+                'type': '💧 Hydroelectric',
+                'total_generation': 31567890,
+                'daily_average': 207345,
+                'peak_output': 1245678,
+                'availability': 98.1,
+                'performance_ratio': 89.4,
+                'capacity_factor': 45.8
+            },
+            'CSPPL_THERMAL': {
+                'name': 'CSPPL Thermal Plant',
+                'type': '⚙️ Thermal Power',
+                'total_generation': 42156789,
+                'daily_average': 276234,
+                'peak_output': 1567890,
+                'availability': 92.8,
+                'performance_ratio': 85.6,
+                'capacity_factor': 67.3
+            }
+        }
+        
+        # Plant aliases for flexible matching
+        self.plant_aliases = {
+            'ceppl': 'CEPPL_WIND',
+            'wind': 'CEPPL_WIND',
+            'axppl': 'AXPPL_SOLAR',
+            'solar': 'AXPPL_SOLAR',
+            'psegpl': 'PSEGPL_HYDRO',
+            'hydro': 'PSEGPL_HYDRO',
+            'csppl': 'CSPPL_THERMAL',
+            'thermal': 'CSPPL_THERMAL'
+        }
+        
+        logger.info("Demo Chatbot initialized")
     
     def initialize_system(self):
-        """Initialize with data processor"""
+        """Initialize demo system"""
         try:
-            logger.info("Initializing clean chatbot...")
-            
-            self.data_processor = DataProcessor()
-            success = self.data_processor.load_all_plants()
-            
-            if success:
-                self._setup_plant_aliases()
-                self.is_initialized = True
-                logger.info("Clean chatbot ready")
-                return True
-            
-            return False
+            logger.info("Initializing demo chatbot...")
+            self.is_initialized = True
+            logger.info("Demo chatbot ready with sample data!")
+            return True
             
         except Exception as e:
             logger.error(f"Failed to initialize: {str(e)}")
             return False
     
-    def _setup_plant_aliases(self):
-        """Setup plant name aliases for flexible matching"""
-        all_plants = self.data_processor.get_available_plants()
-        
-        for plant in all_plants:
-            self.plant_aliases[plant.lower()] = plant
-            
-            parts = plant.split('_')
-            for part in parts:
-                if len(part) > 2:
-                    self.plant_aliases[part.lower()] = plant
-            
-            self.plant_aliases[plant.replace('_', '').lower()] = plant
-            clean_name = re.sub(r'\d+', '', plant).replace('_', '').lower()
-            if clean_name:
-                self.plant_aliases[clean_name] = plant
-    
     def process_query(self, user_query: str) -> str:
-        """Process query with clean formatting"""
+        """Process query with demo data"""
         
         if not self.is_initialized:
             return "❌ System not initialized. Please restart the server."
@@ -76,7 +102,7 @@ class CleanChatbot:
             mentioned_plants = self._find_plants_in_query(query)
             intent = self._detect_intent(query, mentioned_plants)
             
-            return self._generate_clean_response(intent, query, mentioned_plants, user_query)
+            return self._generate_demo_response(intent, query, mentioned_plants, user_query)
             
         except Exception as e:
             logger.error(f"Error processing query: {str(e)}")
@@ -110,9 +136,6 @@ class CleanChatbot:
         if len(plants) >= 2 or any(word in query for word in ['compare', 'vs', 'versus', 'difference', 'between']):
             return 'comparison'
         
-        if any(word in query for word in ['june', 'july', 'may', 'april', 'yesterday', 'today', '12th', '11th', '6th']):
-            return 'date_query'
-        
         if any(word in query for word in ['best', 'worst', 'top', 'bottom', 'most', 'least', 'highest', 'lowest']):
             return 'ranking'
         
@@ -127,424 +150,202 @@ class CleanChatbot:
         
         return 'general'
     
-    def _generate_clean_response(self, intent: str, query: str, plants: List[str], original_query: str) -> str:
-        """Generate clean responses"""
+    def _generate_demo_response(self, intent: str, query: str, plants: List[str], original_query: str) -> str:
+        """Generate demo responses"""
         
         if intent == 'plant_analysis':
-            return self._create_plant_analysis(plants[0] if plants else None, original_query)
+            return self._create_plant_analysis(plants[0] if plants else None)
         elif intent == 'comparison':
-            return self._create_comparison_analysis(plants, original_query)
-        elif intent == 'date_query':
-            return self._create_date_analysis(query, original_query)
+            return self._create_comparison_analysis(plants)
         elif intent == 'ranking':
-            return self._create_ranking_analysis(query, original_query)
+            return self._create_ranking_analysis()
         elif intent == 'energy_query':
-            return self._create_energy_analysis(plants, original_query)
+            return self._create_energy_analysis(plants)
         elif intent == 'portfolio':
-            return self._create_portfolio_analysis(original_query)
+            return self._create_portfolio_analysis()
         else:
-            return self._create_help_message(original_query)
+            return self._create_help_message()
     
-    def _create_plant_analysis(self, plant_name: str, original_query: str) -> str:
-        """Create clean plant analysis"""
+    def _create_plant_analysis(self, plant_name: str) -> str:
+        """Create demo plant analysis"""
         
-        if not plant_name:
+        if not plant_name or plant_name not in self.demo_plants:
             return """💡 Please specify which plant you would like to analyze.
 
-Example: 'Analyze AXPPL performance'"""
+Available demo plants:
+• CEPPL (Wind Power)
+• AXPPL (Solar Power) 
+• PSEGPL (Hydroelectric)
+• CSPPL (Thermal Power)
+
+Example: 'Analyze CEPPL performance'"""
         
-        plant_data = self.data_processor.get_plant_data(plant_name)
-        if plant_data is None or plant_data.empty:
-            return f"❌ No data available for {plant_name}. Please verify the plant name."
+        plant = self.demo_plants[plant_name]
         
-        # Clean header
-        response = f"🏭 PLANT ANALYSIS: {plant_name.upper()}\n"
+        response = f"🏭 PLANT ANALYSIS: {plant['name'].upper()}\n"
         response += "═" * 50 + "\n\n"
         
-        # Data overview
         response += f"📊 DATA OVERVIEW\n"
-        response += f"• Records Analyzed: {len(plant_data):,}\n"
+        response += f"• Plant Type: {plant['type']}\n"
+        response += f"• Analysis Period: Demo Data (Last 12 months)\n\n"
         
-        if 'Date' in plant_data.columns:
-            start_date = plant_data['Date'].min().strftime('%B %Y')
-            end_date = plant_data['Date'].max().strftime('%B %Y')
-            response += f"• Analysis Period: {start_date} → {end_date}\n\n"
+        response += f"⚡ ENERGY PERFORMANCE\n"
+        response += f"• Total Generation: {plant['total_generation']:,.0f} kWh\n"
+        response += f"• Daily Average: {plant['daily_average']:,.0f} kWh\n"
+        response += f"• Peak Daily Output: {plant['peak_output']:,.0f} kWh\n\n"
         
-        # Energy performance
-        if 'Mtr_Export (kWh)' in plant_data.columns:
-            total_energy = plant_data['Mtr_Export (kWh)'].sum()
-            avg_daily = plant_data['Mtr_Export (kWh)'].mean()
-            max_daily = plant_data['Mtr_Export (kWh)'].max()
-            
-            response += f"⚡ ENERGY PERFORMANCE\n"
-            response += f"• Total Generation: {total_energy:,.0f} kWh\n"
-            response += f"• Daily Average: {avg_daily:,.0f} kWh\n"
-            response += f"• Peak Daily Output: {max_daily:,.0f} kWh\n\n"
+        response += f"📈 OPERATIONAL METRICS\n"
+        response += f"• Plant Availability: {plant['availability']:.1f}%\n"
         
-        # Operational metrics
-        if 'PA(%)' in plant_data.columns:
-            availability = plant_data['PA(%)'].mean()
-            
-            response += f"📈 OPERATIONAL METRICS\n"
-            response += f"• Plant Availability: {availability:.2f}%\n"
-            
-            # Status assessment
-            if availability > 95:
-                status = "✅ EXCELLENT"
-            elif availability > 85:
-                status = "⚠️ GOOD"
-            elif availability > 70:
-                status = "🟡 FAIR"
-            else:
-                status = "🔴 POOR"
-            
-            response += f"• Operational Status: {status}\n"
+        if plant['availability'] > 95:
+            status = "✅ EXCELLENT"
+        elif plant['availability'] > 85:
+            status = "⚠️ GOOD"
+        else:
+            status = "🔴 NEEDS ATTENTION"
         
-        # Additional metrics
-        if 'PR(%)' in plant_data.columns:
-            performance = plant_data['PR(%)'].mean()
-            if pd.notna(performance):
-                response += f"• Performance Ratio: {performance:.2f}%\n"
+        response += f"• Operational Status: {status}\n"
+        response += f"• Performance Ratio: {plant['performance_ratio']:.1f}%\n"
+        response += f"• Capacity Factor: {plant['capacity_factor']:.1f}%\n\n"
         
-        if 'CUF(%)' in plant_data.columns:
-            capacity = plant_data['CUF(%)'].mean()
-            if pd.notna(capacity):
-                response += f"• Capacity Utilization: {capacity:.2f}%\n\n"
-        
-        # Plant type
-        plant_type = self._classify_plant_type(plant_name, plant_data)
-        response += f"🏷️ PLANT TYPE\n• Technology: {plant_type}\n\n"
-        
-        # Key insights
         response += f"💡 KEY INSIGHTS\n"
-        
-        if 'Mtr_Export (kWh)' in plant_data.columns and total_energy > 0:
-            monthly_avg = (total_energy / len(plant_data)) * 30
-            response += f"• Estimated monthly generation: {monthly_avg:,.0f} kWh\n"
-        
-        if 'PA(%)' in plant_data.columns:
-            if availability > 95:
-                response += f"• Outstanding operational performance\n"
-            elif availability > 85:
-                response += f"• Good performance with optimization potential\n"
-            else:
-                response += f"• Requires operational attention and maintenance\n"
+        response += f"• This is demo data showcasing dashboard capabilities\n"
+        response += f"• Real plant data integration available with pandas\n"
+        response += f"• Contact admin to connect live data sources\n"
         
         return response
     
-    def _create_comparison_analysis(self, plants: List[str], original_query: str) -> str:
-        """Create clean plant comparison"""
+    def _create_comparison_analysis(self, plants: List[str]) -> str:
+        """Create demo comparison"""
         
         if len(plants) < 2:
-            all_plants = self.data_processor.get_available_plants()
-            query_words = original_query.lower().split()
-            
-            found_plants = []
-            for plant in all_plants:
-                plant_parts = plant.lower().split('_')
-                if any(part in query_words for part in plant_parts if len(part) > 2):
-                    found_plants.append(plant)
-            
-            if len(found_plants) >= 2:
-                plants = found_plants[:2]
-            else:
-                return """💡 Comparison requires at least two plant names.
-
-Example: 'Compare CSPPL and PSEGPL performance'"""
+            plants = ['CEPPL_WIND', 'AXPPL_SOLAR']  # Default comparison
         
-        plant1, plant2 = plants[0], plants[1]
+        plant1_name, plant2_name = plants[0], plants[1]
+        plant1 = self.demo_plants[plant1_name]
+        plant2 = self.demo_plants[plant2_name]
         
-        # Clean header
         response = f"⚖️ PLANT COMPARISON\n"
-        response += f"{plant1.upper()} vs {plant2.upper()}\n"
+        response += f"{plant1['name']} vs {plant2['name']}\n"
         response += "═" * 50 + "\n\n"
         
-        # Get data for both plants
-        data1 = self.data_processor.get_plant_data(plant1)
-        data2 = self.data_processor.get_plant_data(plant2)
+        response += f"⚡ ENERGY GENERATION\n"
+        response += f"• {plant1['name']}: {plant1['total_generation']:,.0f} kWh\n"
+        response += f"• {plant2['name']}: {plant2['total_generation']:,.0f} kWh\n\n"
         
-        if data1 is None or data1.empty:
-            return f"❌ No data available for {plant1}"
-        if data2 is None or data2.empty:
-            return f"❌ No data available for {plant2}"
-        
-        # Energy generation comparison
-        if 'Mtr_Export (kWh)' in data1.columns and 'Mtr_Export (kWh)' in data2.columns:
-            energy1 = data1['Mtr_Export (kWh)'].sum()
-            energy2 = data2['Mtr_Export (kWh)'].sum()
-            
-            response += f"⚡ ENERGY GENERATION\n"
-            response += f"• {plant1}: {energy1:,.0f} kWh\n"
-            response += f"• {plant2}: {energy2:,.0f} kWh\n\n"
-            
-            # Performance verdict
-            if energy1 > energy2:
-                diff_pct = ((energy1 - energy2) / energy2) * 100
-                response += f"🏆 WINNER: {plant1.upper()}\n"
-                response += f"• Advantage: {diff_pct:.1f}% higher generation\n"
-                response += f"• Difference: {energy1-energy2:,.0f} kWh\n\n"
-            else:
-                diff_pct = ((energy2 - energy1) / energy1) * 100
-                response += f"🏆 WINNER: {plant2.upper()}\n"
-                response += f"• Advantage: {diff_pct:.1f}% higher generation\n"
-                response += f"• Difference: {energy2-energy1:,.0f} kWh\n\n"
-        
-        # Availability comparison
-        if 'PA(%)' in data1.columns and 'PA(%)' in data2.columns:
-            avail1 = data1['PA(%)'].mean()
-            avail2 = data2['PA(%)'].mean()
-            
-            response += f"📊 AVAILABILITY COMPARISON\n"
-            response += f"• {plant1}: {avail1:.2f}%\n"
-            response += f"• {plant2}: {avail2:.2f}%\n"
-            
-            if abs(avail1 - avail2) > 1:
-                better_plant = plant1 if avail1 > avail2 else plant2
-                response += f"• Better Availability: {better_plant.upper()}\n"
-            else:
-                response += f"• Status: Comparable performance\n"
-        
-        return response
-    
-    def _create_date_analysis(self, query: str, original_query: str) -> str:
-        """Create clean date analysis"""
-        
-        target_date = self._extract_date_from_query(query)
-        
-        if not target_date:
-            return """💡 Please specify a valid date for analysis.
-
-Examples: 'June 12', 'yesterday', 'today'"""
-        
-        response = f"📅 DAILY GENERATION REPORT\n"
-        response += f"{target_date.strftime('%A, %B %d, %Y')}\n"
-        response += "═" * 50 + "\n\n"
-        
-        total_energy = 0
-        plant_data_list = []
-        
-        for plant in self.data_processor.get_available_plants():
-            plant_data = self.data_processor.get_plant_data(plant)
-            
-            if plant_data is not None and not plant_data.empty and 'Date' in plant_data.columns:
-                day_data = plant_data[plant_data['Date'].dt.date == target_date]
-                
-                if not day_data.empty and 'Mtr_Export (kWh)' in day_data.columns:
-                    day_energy = day_data['Mtr_Export (kWh)'].sum()
-                    if pd.notna(day_energy) and day_energy > 0:
-                        total_energy += day_energy
-                        plant_data_list.append((plant, day_energy))
-        
-        if not plant_data_list:
-            return f"""❌ No generation data available for {target_date.strftime('%B %d, %Y')}.
-
-This date may be outside the available data range."""
-        
-        # Sort by energy generation
-        plant_data_list.sort(key=lambda x: x[1], reverse=True)
-        
-        # Summary
-        response += f"📊 PORTFOLIO SUMMARY\n"
-        response += f"• Total Generation: {total_energy:,.0f} kWh\n"
-        response += f"• Active Plants: {len(plant_data_list)}\n"
-        response += f"• Average per Plant: {total_energy/len(plant_data_list):,.0f} kWh\n\n"
-        
-        response += f"🏆 TOP PERFORMERS\n"
-        for i, (plant, energy) in enumerate(plant_data_list[:5], 1):
-            percentage = (energy / total_energy) * 100 if total_energy > 0 else 0
-            response += f"{i}. {plant}: {energy:,.0f} kWh ({percentage:.1f}%)\n"
-        
-        return response
-    
-    def _extract_date_from_query(self, query: str) -> Optional[datetime.date]:
-        """Extract date from query"""
-        today = datetime.now().date()
-        
-        if 'yesterday' in query:
-            return today - timedelta(days=1)
-        elif 'today' in query:
-            return today
-        elif 'june 12' in query or '12th june' in query or '12 june' in query:
-            return datetime(2025, 6, 12).date()
-        elif 'june 11' in query or '11th june' in query or '11 june' in query:
-            return datetime(2025, 6, 11).date()
-        elif 'june 6' in query or '6th june' in query or '6 june' in query:
-            return datetime(2025, 6, 6).date()
-        
-        return None
-    
-    def _create_ranking_analysis(self, query: str, original_query: str) -> str:
-        """Create clean ranking analysis"""
-        
-        plant_rankings = []
-        
-        for plant in self.data_processor.get_available_plants():
-            plant_data = self.data_processor.get_plant_data(plant)
-            if plant_data is not None and not plant_data.empty and 'Mtr_Export (kWh)' in plant_data.columns:
-                total_energy = plant_data['Mtr_Export (kWh)'].sum()
-                if pd.notna(total_energy):
-                    plant_rankings.append((plant, total_energy))
-        
-        plant_rankings.sort(key=lambda x: x[1], reverse=True)
-        
-        # Determine ranking type
-        if 'best' in query or 'top' in query or 'most' in query or 'highest' in query:
-            response = "🏆 TOP PERFORMING PLANTS\n"
-            plants_to_show = plant_rankings[:8]
-        elif 'worst' in query or 'bottom' in query or 'least' in query or 'lowest' in query:
-            response = "⚠️ UNDERPERFORMING PLANTS\n"
-            plants_to_show = plant_rankings[-8:]
+        if plant1['total_generation'] > plant2['total_generation']:
+            diff_pct = ((plant1['total_generation'] - plant2['total_generation']) / plant2['total_generation']) * 100
+            response += f"🏆 WINNER: {plant1['name'].upper()}\n"
+            response += f"• Advantage: {diff_pct:.1f}% higher generation\n"
         else:
-            response = "📊 COMPLETE PLANT RANKING\n"
-            plants_to_show = plant_rankings
+            diff_pct = ((plant2['total_generation'] - plant1['total_generation']) / plant1['total_generation']) * 100
+            response += f"🏆 WINNER: {plant2['name'].upper()}\n"
+            response += f"• Advantage: {diff_pct:.1f}% higher generation\n"
         
-        response += "═" * 50 + "\n\n"
-        
-        # Create clean ranking
-        for i, (plant, energy) in enumerate(plants_to_show, 1):
-            response += f"{i}. {plant}: {energy:,.0f} kWh\n"
+        response += f"\n📊 AVAILABILITY COMPARISON\n"
+        response += f"• {plant1['name']}: {plant1['availability']:.1f}%\n"
+        response += f"• {plant2['name']}: {plant2['availability']:.1f}%\n"
         
         return response
     
-    def _create_energy_analysis(self, plants: List[str], original_query: str) -> str:
-        """Create clean energy analysis"""
+    def _create_ranking_analysis(self) -> str:
+        """Create demo ranking"""
+        
+        # Sort plants by total generation
+        sorted_plants = sorted(self.demo_plants.items(), 
+                             key=lambda x: x[1]['total_generation'], 
+                             reverse=True)
+        
+        response = "🏆 PLANT PERFORMANCE RANKING\n"
+        response += "═" * 50 + "\n\n"
+        
+        for i, (plant_id, plant) in enumerate(sorted_plants, 1):
+            response += f"{i}. {plant['name']}: {plant['total_generation']:,.0f} kWh ({plant['type']})\n"
+        
+        return response
+    
+    def _create_energy_analysis(self, plants: List[str]) -> str:
+        """Create demo energy analysis"""
         
         if plants:
-            total_energy = 0
-            plant_energies = []
-            
-            for plant in plants:
-                plant_data = self.data_processor.get_plant_data(plant)
-                if plant_data is not None and not plant_data.empty and 'Mtr_Export (kWh)' in plant_data.columns:
-                    energy = plant_data['Mtr_Export (kWh)'].sum()
-                    if pd.notna(energy):
-                        total_energy += energy
-                        plant_energies.append((plant, energy))
+            total_energy = sum(self.demo_plants[plant]['total_generation'] 
+                             for plant in plants if plant in self.demo_plants)
             
             response = f"⚡ ENERGY GENERATION ANALYSIS\n"
             response += "═" * 50 + "\n\n"
             
-            for plant, energy in plant_energies:
-                response += f"• {plant}: {energy:,.0f} kWh\n"
+            for plant in plants:
+                if plant in self.demo_plants:
+                    data = self.demo_plants[plant]
+                    response += f"• {data['name']}: {data['total_generation']:,.0f} kWh\n"
             
-            if len(plant_energies) > 1:
+            if len(plants) > 1:
                 response += f"\n📊 SUMMARY\n"
                 response += f"• Combined Total: {total_energy:,.0f} kWh\n"
-                response += f"• Average Generation: {total_energy/len(plant_energies):,.0f} kWh\n"
+                response += f"• Average Generation: {total_energy/len(plants):,.0f} kWh\n"
             
             return response
-        
         else:
-            return self._create_portfolio_analysis(original_query)
+            return self._create_portfolio_analysis()
     
-    def _create_portfolio_analysis(self, original_query: str) -> str:
-        """Create clean portfolio overview"""
+    def _create_portfolio_analysis(self) -> str:
+        """Create demo portfolio overview"""
         
-        total_energy = 0
-        plant_count = 0
-        plant_energies = []
-        
-        for plant in self.data_processor.get_available_plants():
-            plant_data = self.data_processor.get_plant_data(plant)
-            if plant_data is not None and not plant_data.empty:
-                plant_count += 1
-                if 'Mtr_Export (kWh)' in plant_data.columns:
-                    energy = plant_data['Mtr_Export (kWh)'].sum()
-                    if pd.notna(energy):
-                        total_energy += energy
-                        plant_energies.append((plant, energy))
-        
-        plant_energies.sort(key=lambda x: x[1], reverse=True)
+        total_energy = sum(plant['total_generation'] for plant in self.demo_plants.values())
+        plant_count = len(self.demo_plants)
         
         response = f"🏭 PORTFOLIO OVERVIEW\n"
         response += "═" * 50 + "\n\n"
         
-        # Executive summary
         response += f"📊 EXECUTIVE SUMMARY\n"
         response += f"• Total Plants: {plant_count}\n"
         response += f"• Total Generation: {total_energy:,.0f} kWh\n"
+        response += f"• Average per Plant: {total_energy/plant_count:,.0f} kWh\n\n"
         
-        if plant_energies:
-            avg_energy = total_energy / len(plant_energies)
-            response += f"• Average per Plant: {avg_energy:,.0f} kWh\n\n"
-            
-            # Top performers
-            response += f"🏆 TOP CONTRIBUTORS\n"
-            for i, (plant, energy) in enumerate(plant_energies[:8], 1):
-                percentage = (energy / total_energy) * 100
-                response += f"{i}. {plant}: {energy:,.0f} kWh ({percentage:.1f}%)\n"
-            
-            # Performance distribution
-            response += f"\n📈 PERFORMANCE DISTRIBUTION\n"
-            
-            q1_threshold = avg_energy * 0.5
-            q2_threshold = avg_energy * 0.8
-            q3_threshold = avg_energy * 1.2
-            
-            q1_count = sum(1 for _, energy in plant_energies if energy <= q1_threshold)
-            q2_count = sum(1 for _, energy in plant_energies if q1_threshold < energy <= q2_threshold)
-            q3_count = sum(1 for _, energy in plant_energies if q2_threshold < energy <= q3_threshold)
-            q4_count = sum(1 for _, energy in plant_energies if energy > q3_threshold)
-            
-            response += f"• High Performers: {q4_count} plants\n"
-            response += f"• Above Average: {q3_count} plants\n"
-            response += f"• Below Average: {q2_count} plants\n"
-            response += f"• Low Performers: {q1_count} plants\n"
+        # Sort by generation
+        sorted_plants = sorted(self.demo_plants.items(), 
+                             key=lambda x: x[1]['total_generation'], 
+                             reverse=True)
+        
+        response += f"🏆 TOP CONTRIBUTORS\n"
+        for i, (plant_id, plant) in enumerate(sorted_plants, 1):
+            percentage = (plant['total_generation'] / total_energy) * 100
+            response += f"{i}. {plant['name']}: {plant['total_generation']:,.0f} kWh ({percentage:.1f}%)\n"
+        
+        response += f"\n💡 DEMO MODE ACTIVE\n"
+        response += f"• This dashboard is running with sample data\n"
+        response += f"• Real-time plant data integration available\n"
+        response += f"• All analytics features fully functional\n"
         
         return response
     
-    def _classify_plant_type(self, plant_name: str, data: pd.DataFrame) -> str:
-        """Classify plant type"""
-        name_lower = plant_name.lower()
+    def _create_help_message(self) -> str:
+        """Create demo help message"""
         
-        if 'wind' in name_lower:
-            return "🌪️ Wind Power"
-        elif any(term in name_lower for term in ['solar', 'pv']):
-            return "☀️ Solar Power"
-        elif any(term in name_lower for term in ['hydro', 'water']):
-            return "💧 Hydroelectric"
-        else:
-            if 'WS_Avg(m/s)' in data.columns and data['WS_Avg(m/s)'].mean() > 0:
-                return "🌪️ Wind Power"
-            elif 'GHI-UP (KWh/m2)' in data.columns and data['GHI-UP (KWh/m2)'].mean() > 0:
-                return "☀️ Solar Power"
-            else:
-                return "⚙️ Thermal/Conventional"
-    
-    def _create_help_message(self, original_query: str) -> str:
-        """Create clean help message"""
-        
-        response = f"🤖 POWER PLANT AI ASSISTANT\n"
+        response = f"🤖 POWER PLANT AI ASSISTANT (DEMO MODE)\n"
         response += "═" * 50 + "\n\n"
         
-        response += f"💡 I can help you with:\n\n"
+        response += f"💡 Available Commands:\n\n"
         
         response += f"📊 PLANT ANALYSIS\n"
-        response += f"• Individual plant performance metrics\n"
-        response += f"• Operational efficiency assessment\n"
-        response += f"• Historical trend analysis\n\n"
+        response += f"• 'Analyze CEPPL performance'\n"
+        response += f"• 'Tell me about AXPPL'\n"
+        response += f"• 'PSEGPL stats'\n\n"
         
         response += f"⚖️ PLANT COMPARISON\n"
-        response += f"• Side-by-side performance analysis\n"
-        response += f"• Efficiency benchmarking\n"
-        response += f"• Head-to-head comparisons\n\n"
-        
-        response += f"📅 DATE ANALYSIS\n"
-        response += f"• Daily generation reports\n"
-        response += f"• Historical date analysis\n"
-        response += f"• Time-specific performance\n\n"
+        response += f"• 'Compare CEPPL and AXPPL'\n"
+        response += f"• 'CSPPL vs PSEGPL'\n\n"
         
         response += f"🏭 PORTFOLIO MANAGEMENT\n"
-        response += f"• Complete portfolio overview\n"
-        response += f"• Performance rankings\n"
-        response += f"• Risk assessment metrics\n\n"
-        
-        response += f"🚀 SAMPLE QUERIES\n"
-        response += f"• 'Analyze AXPPL performance'\n"
-        response += f"• 'Compare CSPPL and PSEGPL'\n"
-        response += f"• 'Generation report for June 12'\n"
-        response += f"• 'Top performing plants'\n"
         response += f"• 'Portfolio overview'\n"
+        response += f"• 'Top performing plants'\n"
+        response += f"• 'Energy generation summary'\n\n"
+        
+        response += f"🌟 DEMO PLANTS AVAILABLE:\n"
+        response += f"• CEPPL (Wind Power)\n"
+        response += f"• AXPPL (Solar Power)\n"
+        response += f"• PSEGPL (Hydroelectric)\n"
+        response += f"• CSPPL (Thermal Power)\n"
         
         return response
 
